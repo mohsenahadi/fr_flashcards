@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇫🇷 Mes Flashcards</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f6f2; --surface: #ffffff; --border: #e2e0d8; --border-strong: #c8c5bb;
+    --text: #1a1916; --text-muted: #6b6860; --text-faint: #9e9b94;
+    --accent: #2d6a4f; --pill-bg: #f0ede6; --danger: #c0392b;
+    --radius: 14px; --radius-sm: 8px;
+  }
+  body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 4rem; }
+  header { width: 100%; max-width: 560px; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; }
+  h1 { font-size: 22px; font-weight: normal; letter-spacing: -0.3px; }
+  #counter { font-family: 'Courier New', monospace; font-size: 13px; color: var(--text-faint); }
+
+  /* API setup */
+  #setup { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; }
+  #setup p { font-family: sans-serif; font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  #setup p a { color: var(--accent); }
+  #setup label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; font-family: sans-serif; }
+  #setup .row { display: flex; gap: 8px; }
+  #setup input { flex: 1; font-family: 'Courier New', monospace; font-size: 13px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; }
+  #setup input:focus { border-color: var(--accent); }
+  #setup button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; }
+  #setup button:hover { background: #245a42; }
+  #api-status { font-size: 12px; margin-top: 6px; font-family: sans-serif; }
+  #api-status.ok { color: var(--accent); }
+  #api-status.err { color: var(--danger); }
+
+  /* Card */
+  #card-wrap { width: 100%; max-width: 560px; margin-bottom: 1rem; }
+  #card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem 2rem; min-height: 280px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.15s, transform 0.12s; user-select: none; }
+  #card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  #card:active { transform: translateY(0); }
+  .front { text-align: center; }
+  .front .word { font-size: 32px; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+  .front .tap-hint { font-size: 13px; color: var(--text-faint); font-family: sans-serif; font-style: italic; }
+  .back { width: 100%; }
+  .back .word-sm { font-size: 20px; text-align: center; margin-bottom: 4px; }
+  .back .translation { font-size: 13px; color: var(--text-muted); text-align: center; font-family: sans-serif; margin-bottom: 1.25rem; }
+  .section-label { font-family: sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+  .synonym-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+  .pill { background: var(--pill-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 13px; font-family: sans-serif; color: var(--text); }
+  .examples { display: flex; flex-direction: column; gap: 10px; }
+  .example { font-size: 14px; color: var(--text-muted); line-height: 1.65; padding-left: 14px; border-left: 2px solid var(--border-strong); font-family: sans-serif; }
+  .spinner-wrap { text-align: center; }
+  .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--text-faint); font-family: sans-serif; }
+  #error-msg { font-size: 13px; color: var(--danger); text-align: center; margin-top: 8px; font-family: sans-serif; min-height: 20px; }
+
+  /* Controls */
+  .controls { width: 100%; max-width: 560px; display: flex; gap: 10px; margin-bottom: 2rem; }
+  .controls button { flex: 1; padding: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; color: var(--text); transition: background 0.12s, border-color 0.12s; }
+  .controls button:hover { background: var(--pill-bg); border-color: var(--border-strong); }
+
+  /* Add section */
+  #add-section { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .section-header h2 { font-size: 14px; font-weight: normal; font-family: sans-serif; color: var(--text-muted); margin: 0; }
+  .toggle-btn { background: none; border: 1px solid var(--border); border-radius: 20px; padding: 3px 12px; font-family: sans-serif; font-size: 12px; color: var(--text-faint); cursor: pointer; transition: border-color 0.12s, color 0.12s; white-space: nowrap; }
+  .toggle-btn:hover { border-color: var(--border-strong); color: var(--text-muted); }
+  .add-row { display: flex; gap: 8px; }
+  .add-row input { flex: 1; padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Georgia', serif; font-size: 14px; background: var(--bg); color: var(--text); outline: none; }
+  .add-row input:focus { border-color: var(--accent); }
+  .add-row input::placeholder { color: var(--text-faint); }
+  .add-row button { padding: 9px 18px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; }
+  .add-row button:hover { background: #245a42; }
+
+  /* Collapsible word list */
+  #word-list-wrap { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; }
+  #word-list-wrap.collapsed { max-height: 0 !important; opacity: 0; }
+  #word-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; background: var(--pill-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px 4px 13px; font-size: 13px; font-family: sans-serif; }
+  .tag button { background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 15px; line-height: 1; padding: 0; }
+  .tag button:hover { color: var(--danger); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🇫🇷 Mes flashcards</h1>
+  <span id="counter"></span>
+</header>
+
+<div id="setup">
+  <p>Clé API Groq gratuite → <a href="https://console.groq.com" target="_blank">console.groq.com</a> (créer un compte → API Keys → Create API Key)</p>
+  <label>Clé API Groq (stockée localement dans votre navigateur)</label>
+  <div class="row">
+    <input type="password" id="api-key" placeholder="gsk_..." autocomplete="off" />
+    <button onclick="saveKey()">Enregistrer</button>
+  </div>
+  <div id="api-status"></div>
+</div>
+
+<div id="card-wrap">
+  <div id="card" onclick="flipCard()">
+    <div class="front">
+      <div class="word">—</div>
+      <div class="tap-hint">cliquez pour révéler</div>
+    </div>
+  </div>
+  <div id="error-msg"></div>
+</div>
+
+<div class="controls">
+  <button onclick="prevCard()">← Précédent</button>
+  <button onclick="shuffleDeck()">⇄ Mélanger</button>
+  <button onclick="nextCard()">Suivant →</button>
+</div>
+
+<div id="add-section">
+  <div class="section-header">
+    <h2>Mots (<span id="word-count">0</span>)</h2>
+    <button class="toggle-btn" id="toggle-btn" onclick="toggleList()">▾ Afficher</button>
+  </div>
+  <div class="add-row">
+    <input type="text" id="new-word" placeholder="ex: rigueur  ou  livrer: to deliver"
+      onkeydown="if(event.key==='Enter') addWord()" />
+    <button onclick="addWord()">+ Ajouter</button>
+  </div>
+  <div id="word-list-wrap" class="collapsed">
+    <div id="word-list"></div>
+  </div>
+</div>
+
+<script>
+const INITIAL_WORDS = [
+  "Dictionnaire",
+  "Abordable",
+  "Faciliter",
+  "Rigueur",
+  "Fournir: to provide",
+  "Rater: to fail or miss",
+  "ça n'a pas de sens",
+  "Déclencher",
+  "Rajouter",
+  "Livrer",
+  "Je me suis rendu: I went / I realized",
+  "Il faut que je teste: I need to test",
+  "Point de vue: point of view",
+  "La gestion: management / handling",
+  "Du coup: so / as a result",
+  "Constituer: to constitute / to make up",
+  "Contrairement à LTE: unlike LTE",
+  "Fichier et dossier: file and folder",
+  "Ramener sa fraise: to show up uninvited / to butt in",
+  "Souligner: to underline / to highlight",
+  "Assigner: to assign",
+  "Établir / il établit: to establish / he establishes",
+  "Par rapport à: compared to / regarding",
+  "J'ai noté: I noted / I noticed",
+  "Je remarque: I notice",
+  "Entre guillemets: in quotes",
+  "Entre parenthèses: in brackets",
+  "Je regarde ce qui se passe dans: I look at what is happening in",
+  "Gérer: to manage / to handle",
+  "Deux par deux, quatre par quatre: two by two, four by four",
+  "Est-ce qu'il y a un moyen de mesurer qqch: is there a way to measure sth",
+  "Le métro est bondé / surchargé: the metro is packed / overloaded",
+  "Obtenir: to obtain / to get",
+  "Il obtient: he obtains / he gets",
+  "J'ai fait un résumé: I made a summary",
+  "J'ai viré: I removed / I fired",
+  "Virer: to remove / to fire / to transfer",
+  "De temps en temps: from time to time",
+  "La réponse: the answer / the response",
+  "J'ai corrigé: I corrected / I fixed",
+  "Au niveau de: at the level of / in terms of",
+  "Il va falloir: we'll need to / it will be necessary to",
+  "Le problème est réglé: the problem is solved",
+  "Multiplier les matrices: to multiply the matrices",
+  "Je disais que: I was saying that",
+  "Décaler: to shift / to offset",
+  "Tous les signaux: all the signals",
+  "On a pas mal de trucs pour le faire: we have quite a few things to do it",
+  "Plusieurs cellules: several cells",
+  "Sauf que tu dois faire qqch: except that you have to do sth",
+  "C'est ce que je disais: that's what I was saying",
+  "C'est à toi: it's your turn / it's yours",
+  "Il correspond à: it corresponds to",
+  "Explicitement: explicitly",
+  "C'est aussi bon: it's just as good",
+  "Investigation",
+  "Emmerder: to annoy / to bug someone",
+  "Ça me fait poser la question: it makes me wonder / raises the question",
+  "Dans certaines conditions: under certain conditions",
+  "Cohérent: consistent / coherent",
+  "Confiance en soi: self-confidence",
+  "Il m'a parlé: he spoke to me",
+  "On avait fait: we had done",
+  "J'avais fait: I had done",
+  "On n'a jamais pu tester: we were never able to test",
+  "Ça rajoute un mode: it adds a mode",
+  "Ça sert à: it is used for / it serves to",
+  "Inférieur: lower / inferior",
+  "Supérieur: higher / superior",
+  "Au début: at the beginning",
+  "À la fin / au bout: at the end",
+  "A priori: a priori / in principle",
+  "Faible ou fort: weak or strong / low or high",
+  "En revanche: on the other hand / however",
+  "Traiteur: caterer / deli",
+  "Régulièrement: regularly",
+  "Étend la connectivité: extends connectivity",
+  "Le flux protocolaire: the protocol flow",
+  "Le défi principal: the main challenge",
+  "Exprimé: expressed",
+  "Les fichiers config qui correspondent à: the config files that correspond to",
+  "Résoudre: to solve / to resolve",
+  "Cela résout: this solves / this resolves",
+  "Activer ou désactiver: to enable or disable",
+  "2 par 2 ou 4 par 4: 2 by 2 or 4 by 4",
+  "Boucle: loop",
+  "Par défaut: by default",
+  "Des fois ça marche, des fois ça marche pas: sometimes it works, sometimes it doesn't",
+  "Basculer: to tip / to flip / to switch from one state to another",
+  "J'ai corrigé les bugs: I fixed the bugs",
+  "J'ai résolu les erreurs: I resolved the errors",
+  "Le problème est résolu: the problem is resolved",
+  "C'est résolu: it's resolved",
+  "Dépasser: to exceed / to go beyond",
+  "Ça ne dépasse pas la limite: it doesn't exceed the limit",
+  "Ça équilibre le ratio: it balances the ratio",
+  "Comportement: behavior",
+  "Relâcher: to release / to let go",
+  "Pleines, occupées: full, busy / occupied",
+  "Ça me ralentit / ça me fait ralentir: it slows me down",
+  "Le scénario: the scenario",
+  "Prendre l'air: to get some fresh air",
+  "Concurrent: concurrent / competitor",
+  "Aligné: aligned",
+  "Le problème c'est que: the problem is that",
+  "Gros/grosse: big (volume / thickness / importance)",
+  "Grand/grande: tall / large (overall size)",
+  "Long/longue: long (time or physical distance)",
+  "Sonnerie: ringtone / ringing",
+  "Une puissance constante: a constant power",
+  "Si ça a l'air suffisant: if it looks sufficient",
+  "J'ai demandé à quelqu'un: I asked someone",
+  "C'est ce qui m'a occupé: that's what kept me busy",
+  "La semaine dernière / la semaine d'avant: last week / the week before",
+  "La semaine prochaine / la semaine d'après: next week / the week after",
+  "On a livré aux clients principaux: we delivered to the main clients",
+  "Les gens qui veulent: the people who want",
+  "Ils font quelque chose: they do something",
+  "Ils vont quelque part: they go somewhere",
+  "Ils veulent quelque chose: they want something",
+  "Des dizaines ou des centaines: tens or hundreds",
+  "C'est l'ancien algo: it's the old algorithm",
+  "C'est le nouvel algo: it's the new algorithm",
+  "Il n'y a qu'un seul: there is only one",
+  "Ça me saoule / ça me soûle: it's annoying me / it's getting on my nerves",
+  "Ça pourrait être: it could be",
+  "Ça m'a surpris: it surprised me",
+  "Cramer: to burn / to fry (informal)",
+];
+
+let words = [...INITIAL_WORDS];
+let order = [];
+let idx = 0;
+let flipped = false;
+let cache = {};
+let loading = false;
+let listVisible = false;
+let apiKey = localStorage.getItem('groq_key') || '';
+
+function saveKey() {
+  const val = document.getElementById('api-key').value.trim();
+  if (!val.startsWith('gsk_')) { setStatus('Clé invalide (doit commencer par gsk_...)', false); return; }
+  apiKey = val;
+  localStorage.setItem('groq_key', val);
+  document.getElementById('api-key').value = '';
+  setStatus('✓ Clé enregistrée', true);
+}
+
+function setStatus(msg, ok) {
+  const el = document.getElementById('api-status');
+  el.textContent = msg;
+  el.className = ok ? 'ok' : 'err';
+}
+
+if (apiKey) setStatus('✓ Clé chargée depuis la mémoire locale', true);
+
+function toggleList() {
+  listVisible = !listVisible;
+  const wrap = document.getElementById('word-list-wrap');
+  const btn = document.getElementById('toggle-btn');
+  if (listVisible) {
+    wrap.classList.remove('collapsed');
+    wrap.style.maxHeight = wrap.scrollHeight + 'px';
+    btn.textContent = '▴ Masquer';
+  } else {
+    wrap.style.maxHeight = wrap.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      wrap.classList.add('collapsed');
+    });
+    btn.textContent = '▾ Afficher';
+  }
+}
+
+function shuffleDeck() {
+  order = [...Array(words.length).keys()].sort(() => Math.random() - 0.5);
+  idx = 0; flipped = false;
+  showFront();
+}
+
+function showFront() {
+  flipped = false;
+  const word = words[order[idx]];
+  document.getElementById('card').innerHTML = `
+    <div class="front">
+      <div class="word">${word}</div>
+      <div class="tap-hint">cliquez pour révéler</div>
+    </div>`;
+  document.getElementById('error-msg').textContent = '';
+  document.getElementById('counter').textContent = `${idx + 1} / ${words.length}`;
+}
+
+function prevCard() { if (idx > 0) { idx--; showFront(); } }
+function nextCard() { if (idx < order.length - 1) { idx++; showFront(); } }
+
+async function flipCard() {
+  if (loading) return;
+  if (flipped) { showFront(); return; }
+  if (!apiKey) { document.getElementById('error-msg').textContent = 'Entrez votre clé API Groq ci-dessus.'; return; }
+
+  const word = words[order[idx]];
+  if (cache[word]) { showBack(cache[word]); return; }
+
+  loading = true; flipped = true;
+  document.getElementById('card').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><div class="loading-text">Consultation du dictionnaire...</div></div>`;
+  document.getElementById('error-msg').textContent = '';
+
+  try {
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.4,
+        max_tokens: 600,
+        messages: [
+          { role: 'system', content: 'You are a French language teacher. Always respond with valid JSON only — no markdown, no explanation, no extra text.' },
+          { role: 'user', content: `For the French word or phrase: "${word}"
+
+Return ONLY a JSON object with this exact structure:
+{
+  "word": "the word/phrase cleaned up",
+  "translation": "English translation in a few words",
+  "synonyms": ["syn1", "syn2", "syn3"],
+  "examples": [
+    "Example sentence in a professional context.",
+    "Example sentence in a casual everyday context.",
+    "Example sentence in another different context."
+  ]
+}
+
+All synonyms and all example sentences must be in French.` }
+        ]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const text = data.choices[0].message.content.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+    cache[word] = parsed;
+    showBack(parsed);
+  } catch(e) {
+    document.getElementById('error-msg').textContent = 'Erreur : ' + e.message;
+    showFront();
+  }
+  loading = false;
+}
+
+function showBack(data) {
+  const pills = (data.synonyms || []).map(s => `<span class="pill">${s}</span>`).join('');
+  const exs = (data.examples || []).map(e => `<div class="example">${e}</div>`).join('');
+  document.getElementById('card').innerHTML = `
+    <div class="back">
+      <div class="word-sm">${data.word || ''}</div>
+      <div class="translation">${data.translation || ''}</div>
+      <hr class="divider">
+      <div class="section-label">Synonymes</div>
+      <div class="synonym-row">${pills || '<span style="font-size:13px;color:#9e9b94;font-family:sans-serif">—</span>'}</div>
+      <div class="section-label">Exemples</div>
+      <div class="examples">${exs}</div>
+    </div>`;
+  flipped = true;
+}
+
+function renderWordList() {
+  document.getElementById('word-count').textContent = words.length;
+  document.getElementById('word-list').innerHTML = words.map((w, i) => `
+    <span class="tag">${w}<button onclick="removeWord(${i})" title="Supprimer">×</button></span>`).join('');
+  // update height if list is open
+  if (listVisible) {
+    const wrap = document.getElementById('word-list-wrap');
+    wrap.style.maxHeight = 'none';
+    requestAnimationFrame(() => { wrap.style.maxHeight = wrap.scrollHeight + 'px'; });
+  }
+}
+
+function addWord() {
+  const input = document.getElementById('new-word');
+  const val = input.value.trim();
+  if (!val) return;
+  words.push(val); input.value = '';
+  renderWordList(); shuffleDeck();
+}
+
+function removeWord(i) {
+  words.splice(i, 1); renderWordList();
+  if (words.length) shuffleDeck();
+  else {
+    document.getElementById('card').innerHTML = `<div class="front"><div class="word">—</div><div class="tap-hint">Ajoutez des mots ci-dessous</div></div>`;
+    document.getElementById('counter').textContent = '';
+  }
+}
+
+renderWordList();
+shuffleDeck();
+</script>
+</body>
+</html>
