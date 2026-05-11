@@ -436,12 +436,12 @@ function renderWordList() {
     const colonIdx = w.indexOf(':');
     const main = colonIdx > -1 ? w.slice(0, colonIdx).trim() : w;
     const hint = colonIdx > -1 ? w.slice(colonIdx + 1).trim() : '';
-    return `<div class="word-row">
+    return `<div class="word-row" onclick="jumpToWord(${i})" style="cursor:pointer" title="Voir la définition">
       <span class="word-num">${start + pi + 1}</span>
       <span class="word-text">
         <span class="word-main">${main}</span>${hint ? `<span class="word-hint"> — ${hint}</span>` : ''}
       </span>
-      <button class="del-btn" onclick="removeWord(${i})" title="Supprimer">×</button>
+      <button class="del-btn" onclick="event.stopPropagation();removeWord(${i})" title="Supprimer">×</button>
     </div>`;
   }).join('');
 
@@ -478,11 +478,58 @@ function addWord() {
   const val = input.value.trim();
   if (!val) return;
   words.push(val); input.value = '';
-  currentPage = Math.floor((words.length - 1) / pageSize); // jump to last page
-  renderWordList(); shuffleDeck();
+  currentPage = Math.floor((words.length - 1) / pageSize);
+  renderWordList();
+  // Point deck to the new word and auto-lookup
+  order = [...Array(words.length).keys()];
+  cardIdx = words.length - 1;
+  flipped = false;
+  document.getElementById('counter').textContent = `${cardIdx + 1} / ${words.length}`;
+  lookupWord(val);
 }
 
-function removeWord(realIdx) {
+async function lookupWord(word) {
+  if (!apiKey) {
+    // just show the front without lookup
+    showFront(); return;
+  }
+  if (cache[word]) { showBack(cache[word]); return; }
+  loading = true; flipped = true;
+  document.getElementById('card').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><div class="loading-text">Consultation du dictionnaire...</div></div>`;
+  document.getElementById('error-msg').textContent = '';
+  try {
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant', temperature: 0.4, max_tokens: 600,
+        messages: [
+          { role: 'system', content: 'You are a French language teacher. Always respond with valid JSON only — no markdown, no explanation, no extra text.' },
+          { role: 'user', content: `For the French word or phrase: "${word}"\n\nReturn ONLY a JSON object:\n{\n  "word": "cleaned up word/phrase",\n  "translation": "English translation",\n  "synonyms": ["syn1","syn2","syn3"],\n  "examples": ["Professional context sentence.","Casual context sentence.","Another context sentence."]\n}\nAll synonyms and examples must be in French.` }
+        ]
+      })
+    });
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || `HTTP ${resp.status}`); }
+    const data = await resp.json();
+    const parsed = JSON.parse(data.choices[0].message.content.replace(/```json|```/g,'').trim());
+    cache[word] = parsed; showBack(parsed);
+  } catch(e) {
+    document.getElementById('error-msg').textContent = 'Erreur : ' + e.message; showFront();
+  }
+  loading = false;
+}
+
+function jumpToWord(realIdx) {
+  order = [...Array(words.length).keys()];
+  cardIdx = realIdx;
+  flipped = false;
+  document.getElementById('counter').textContent = `${cardIdx + 1} / ${words.length}`;
+  lookupWord(words[realIdx]);
+  // scroll to top so card is visible
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
   words.splice(realIdx, 1);
   if (currentPage >= Math.ceil(words.length / pageSize)) currentPage = Math.max(0, currentPage - 1);
   renderWordList();
