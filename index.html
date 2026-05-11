@@ -9,7 +9,7 @@
   :root {
     --bg: #f7f6f2; --surface: #ffffff; --border: #e2e0d8; --border-strong: #c8c5bb;
     --text: #1a1916; --text-muted: #6b6860; --text-faint: #9e9b94;
-    --accent: #2d6a4f; --pill-bg: #f0ede6; --danger: #c0392b;
+    --accent: #2d6a4f; --accent-hover: #245a42; --pill-bg: #f0ede6; --danger: #c0392b;
     --radius: 14px; --radius-sm: 8px;
   }
   body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 4rem; }
@@ -26,7 +26,7 @@
   #setup input { flex: 1; font-family: 'Courier New', monospace; font-size: 13px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; }
   #setup input:focus { border-color: var(--accent); }
   #setup button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; }
-  #setup button:hover { background: #245a42; }
+  #setup button:hover { background: var(--accent-hover); }
   #api-status { font-size: 12px; margin-top: 6px; font-family: sans-serif; }
   #api-status.ok { color: var(--accent); }
   #api-status.err { color: var(--danger); }
@@ -59,26 +59,55 @@
   .controls button { flex: 1; padding: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; color: var(--text); transition: background 0.12s, border-color 0.12s; }
   .controls button:hover { background: var(--pill-bg); border-color: var(--border-strong); }
 
-  /* Add section */
-  #add-section { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .section-header h2 { font-size: 14px; font-weight: normal; font-family: sans-serif; color: var(--text-muted); margin: 0; }
-  .toggle-btn { background: none; border: 1px solid var(--border); border-radius: 20px; padding: 3px 12px; font-family: sans-serif; font-size: 12px; color: var(--text-faint); cursor: pointer; transition: border-color 0.12s, color 0.12s; white-space: nowrap; }
-  .toggle-btn:hover { border-color: var(--border-strong); color: var(--text-muted); }
-  .add-row { display: flex; gap: 8px; }
-  .add-row input { flex: 1; padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Georgia', serif; font-size: 14px; background: var(--bg); color: var(--text); outline: none; }
+  /* Word list panel */
+  #list-section { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  /* List toolbar */
+  .list-toolbar { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .list-title { font-family: sans-serif; font-size: 14px; color: var(--text-muted); flex: 1; white-space: nowrap; }
+  .list-title strong { color: var(--text); }
+
+  .sort-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .sort-btn { background: var(--surface); border: none; padding: 5px 11px; font-family: sans-serif; font-size: 12px; color: var(--text-faint); cursor: pointer; transition: background 0.12s, color 0.12s; white-space: nowrap; }
+  .sort-btn:not(:last-child) { border-right: 1px solid var(--border); }
+  .sort-btn.active { background: var(--accent); color: white; }
+  .sort-btn:hover:not(.active) { background: var(--pill-bg); color: var(--text-muted); }
+
+  .toggle-list-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 11px; font-family: sans-serif; font-size: 12px; color: var(--text-faint); cursor: pointer; white-space: nowrap; }
+  .toggle-list-btn:hover { border-color: var(--border-strong); color: var(--text-muted); }
+
+  /* Collapsible body */
+  #list-body { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; }
+  #list-body.collapsed { max-height: 0 !important; opacity: 0; }
+
+  /* Add row */
+  .add-row { display: flex; gap: 8px; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .add-row input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Georgia', serif; font-size: 14px; background: var(--bg); color: var(--text); outline: none; }
   .add-row input:focus { border-color: var(--accent); }
   .add-row input::placeholder { color: var(--text-faint); }
-  .add-row button { padding: 9px 18px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; }
-  .add-row button:hover { background: #245a42; }
+  .add-row button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; }
+  .add-row button:hover { background: var(--accent-hover); }
 
-  /* Collapsible word list */
-  #word-list-wrap { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; }
-  #word-list-wrap.collapsed { max-height: 0 !important; opacity: 0; }
-  #word-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
-  .tag { display: inline-flex; align-items: center; gap: 5px; background: var(--pill-bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px 4px 13px; font-size: 13px; font-family: sans-serif; }
-  .tag button { background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 15px; line-height: 1; padding: 0; }
-  .tag button:hover { color: var(--danger); }
+  /* Word rows */
+  #word-rows { padding: 0.5rem 0; }
+  .word-row { display: flex; align-items: center; gap: 10px; padding: 7px 1.25rem; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 13px; }
+  .word-row:last-child { border-bottom: none; }
+  .word-row:hover { background: var(--bg); }
+  .word-num { color: var(--text-faint); font-family: 'Courier New', monospace; font-size: 11px; min-width: 28px; }
+  .word-text { flex: 1; color: var(--text); line-height: 1.4; }
+  .word-text .word-main { font-weight: 500; }
+  .word-text .word-hint { color: var(--text-faint); font-size: 12px; }
+  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 4px; }
+  .del-btn:hover { color: var(--danger); background: #fdf0ee; }
+
+  /* Pagination */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); gap: 8px; }
+  .page-info { font-family: sans-serif; font-size: 12px; color: var(--text-faint); }
+  .page-btns { display: flex; gap: 6px; align-items: center; }
+  .page-size-select { font-family: sans-serif; font-size: 12px; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-muted); cursor: pointer; outline: none; }
+  .page-nav { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-family: sans-serif; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: background 0.12s; }
+  .page-nav:hover:not(:disabled) { background: var(--pill-bg); border-color: var(--border-strong); }
+  .page-nav:disabled { opacity: 0.35; cursor: default; }
 </style>
 </head>
 <body>
@@ -100,10 +129,7 @@
 
 <div id="card-wrap">
   <div id="card" onclick="flipCard()">
-    <div class="front">
-      <div class="word">—</div>
-      <div class="tap-hint">cliquez pour révéler</div>
-    </div>
+    <div class="front"><div class="word">—</div><div class="tap-hint">cliquez pour révéler</div></div>
   </div>
   <div id="error-msg"></div>
 </div>
@@ -114,18 +140,36 @@
   <button onclick="nextCard()">Suivant →</button>
 </div>
 
-<div id="add-section">
-  <div class="section-header">
-    <h2>Mots (<span id="word-count">0</span>)</h2>
-    <button class="toggle-btn" id="toggle-btn" onclick="toggleList()">▾ Afficher</button>
+<!-- Word list panel -->
+<div id="list-section">
+  <div class="list-toolbar">
+    <span class="list-title">Mots &nbsp;<strong id="word-count">0</strong></span>
+    <div class="sort-group">
+      <button class="sort-btn active" id="sort-added" onclick="setSort('added')">Ajouté</button>
+      <button class="sort-btn" id="sort-alpha" onclick="setSort('alpha')">A → Z</button>
+    </div>
+    <button class="toggle-list-btn" id="toggle-list-btn" onclick="toggleList()">▾ Afficher</button>
   </div>
-  <div class="add-row">
-    <input type="text" id="new-word" placeholder="ex: rigueur  ou  livrer: to deliver"
-      onkeydown="if(event.key==='Enter') addWord()" />
-    <button onclick="addWord()">+ Ajouter</button>
-  </div>
-  <div id="word-list-wrap" class="collapsed">
-    <div id="word-list"></div>
+
+  <div id="list-body" class="collapsed">
+    <div class="add-row">
+      <input type="text" id="new-word" placeholder="ex: rigueur  ou  livrer: to deliver"
+        onkeydown="if(event.key==='Enter') addWord()" />
+      <button onclick="addWord()">+ Ajouter</button>
+    </div>
+    <div id="word-rows"></div>
+    <div class="pagination">
+      <span class="page-info" id="page-info"></span>
+      <div class="page-btns">
+        <select class="page-size-select" id="page-size" onchange="changePageSize()">
+          <option value="25">25 / page</option>
+          <option value="50">50 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+        <button class="page-nav" id="btn-prev-page" onclick="changePage(-1)">← Préc.</button>
+        <button class="page-nav" id="btn-next-page" onclick="changePage(1)">Suiv. →</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -263,13 +307,17 @@ const INITIAL_WORDS = [
 
 let words = [...INITIAL_WORDS];
 let order = [];
-let idx = 0;
+let cardIdx = 0;
 let flipped = false;
 let cache = {};
 let loading = false;
 let listVisible = false;
+let sortMode = 'added'; // 'added' | 'alpha'
+let pageSize = 25;
+let currentPage = 0;
 let apiKey = localStorage.getItem('groq_key') || '';
 
+// ── API key ──────────────────────────────────────────────────────────────
 function saveKey() {
   const val = document.getElementById('api-key').value.trim();
   if (!val.startsWith('gsk_')) { setStatus('Clé invalide (doit commencer par gsk_...)', false); return; }
@@ -278,136 +326,150 @@ function saveKey() {
   document.getElementById('api-key').value = '';
   setStatus('✓ Clé enregistrée', true);
 }
-
 function setStatus(msg, ok) {
   const el = document.getElementById('api-status');
-  el.textContent = msg;
-  el.className = ok ? 'ok' : 'err';
+  el.textContent = msg; el.className = ok ? 'ok' : 'err';
 }
-
 if (apiKey) setStatus('✓ Clé chargée depuis la mémoire locale', true);
 
-function toggleList() {
-  listVisible = !listVisible;
-  const wrap = document.getElementById('word-list-wrap');
-  const btn = document.getElementById('toggle-btn');
-  if (listVisible) {
-    wrap.classList.remove('collapsed');
-    wrap.style.maxHeight = wrap.scrollHeight + 'px';
-    btn.textContent = '▴ Masquer';
-  } else {
-    wrap.style.maxHeight = wrap.scrollHeight + 'px';
-    requestAnimationFrame(() => {
-      wrap.classList.add('collapsed');
-    });
-    btn.textContent = '▾ Afficher';
-  }
-}
-
+// ── Deck ─────────────────────────────────────────────────────────────────
 function shuffleDeck() {
   order = [...Array(words.length).keys()].sort(() => Math.random() - 0.5);
-  idx = 0; flipped = false;
-  showFront();
+  cardIdx = 0; flipped = false; showFront();
 }
-
 function showFront() {
   flipped = false;
-  const word = words[order[idx]];
+  const word = words[order[cardIdx]];
   document.getElementById('card').innerHTML = `
-    <div class="front">
-      <div class="word">${word}</div>
-      <div class="tap-hint">cliquez pour révéler</div>
-    </div>`;
+    <div class="front"><div class="word">${word}</div><div class="tap-hint">cliquez pour révéler</div></div>`;
   document.getElementById('error-msg').textContent = '';
-  document.getElementById('counter').textContent = `${idx + 1} / ${words.length}`;
+  document.getElementById('counter').textContent = `${cardIdx + 1} / ${words.length}`;
 }
-
-function prevCard() { if (idx > 0) { idx--; showFront(); } }
-function nextCard() { if (idx < order.length - 1) { idx++; showFront(); } }
+function prevCard() { if (cardIdx > 0) { cardIdx--; showFront(); } }
+function nextCard() { if (cardIdx < order.length - 1) { cardIdx++; showFront(); } }
 
 async function flipCard() {
   if (loading) return;
   if (flipped) { showFront(); return; }
   if (!apiKey) { document.getElementById('error-msg').textContent = 'Entrez votre clé API Groq ci-dessus.'; return; }
-
-  const word = words[order[idx]];
+  const word = words[order[cardIdx]];
   if (cache[word]) { showBack(cache[word]); return; }
-
   loading = true; flipped = true;
   document.getElementById('card').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><div class="loading-text">Consultation du dictionnaire...</div></div>`;
   document.getElementById('error-msg').textContent = '';
-
   try {
     const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        temperature: 0.4,
-        max_tokens: 600,
+        model: 'llama-3.1-8b-instant', temperature: 0.4, max_tokens: 600,
         messages: [
           { role: 'system', content: 'You are a French language teacher. Always respond with valid JSON only — no markdown, no explanation, no extra text.' },
-          { role: 'user', content: `For the French word or phrase: "${word}"
-
-Return ONLY a JSON object with this exact structure:
-{
-  "word": "the word/phrase cleaned up",
-  "translation": "English translation in a few words",
-  "synonyms": ["syn1", "syn2", "syn3"],
-  "examples": [
-    "Example sentence in a professional context.",
-    "Example sentence in a casual everyday context.",
-    "Example sentence in another different context."
-  ]
-}
-
-All synonyms and all example sentences must be in French.` }
+          { role: 'user', content: `For the French word or phrase: "${word}"\n\nReturn ONLY a JSON object:\n{\n  "word": "cleaned up word/phrase",\n  "translation": "English translation",\n  "synonyms": ["syn1","syn2","syn3"],\n  "examples": ["Professional context sentence.","Casual context sentence.","Another context sentence."]\n}\nAll synonyms and examples must be in French.` }
         ]
       })
     });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${resp.status}`);
-    }
-
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || `HTTP ${resp.status}`); }
     const data = await resp.json();
-    const text = data.choices[0].message.content.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(text);
-    cache[word] = parsed;
-    showBack(parsed);
+    const parsed = JSON.parse(data.choices[0].message.content.replace(/```json|```/g,'').trim());
+    cache[word] = parsed; showBack(parsed);
   } catch(e) {
-    document.getElementById('error-msg').textContent = 'Erreur : ' + e.message;
-    showFront();
+    document.getElementById('error-msg').textContent = 'Erreur : ' + e.message; showFront();
   }
   loading = false;
 }
 
 function showBack(data) {
-  const pills = (data.synonyms || []).map(s => `<span class="pill">${s}</span>`).join('');
-  const exs = (data.examples || []).map(e => `<div class="example">${e}</div>`).join('');
+  const pills = (data.synonyms||[]).map(s=>`<span class="pill">${s}</span>`).join('');
+  const exs = (data.examples||[]).map(e=>`<div class="example">${e}</div>`).join('');
   document.getElementById('card').innerHTML = `
     <div class="back">
-      <div class="word-sm">${data.word || ''}</div>
-      <div class="translation">${data.translation || ''}</div>
+      <div class="word-sm">${data.word||''}</div>
+      <div class="translation">${data.translation||''}</div>
       <hr class="divider">
       <div class="section-label">Synonymes</div>
-      <div class="synonym-row">${pills || '<span style="font-size:13px;color:#9e9b94;font-family:sans-serif">—</span>'}</div>
+      <div class="synonym-row">${pills||'<span style="font-size:13px;color:#9e9b94;font-family:sans-serif">—</span>'}</div>
       <div class="section-label">Exemples</div>
       <div class="examples">${exs}</div>
     </div>`;
   flipped = true;
 }
 
+// ── Word list ─────────────────────────────────────────────────────────────
+function getDisplayList() {
+  if (sortMode === 'alpha') {
+    return [...words].map((w,i)=>({w,i})).sort((a,b)=>
+      a.w.replace(/[^a-zA-ZÀ-ÿ]/g,'').toLowerCase().localeCompare(
+        b.w.replace(/[^a-zA-ZÀ-ÿ]/g,'').toLowerCase(), 'fr'));
+  }
+  return words.map((w,i)=>({w,i}));
+}
+
+function setSort(mode) {
+  sortMode = mode; currentPage = 0;
+  document.getElementById('sort-added').classList.toggle('active', mode==='added');
+  document.getElementById('sort-alpha').classList.toggle('active', mode==='alpha');
+  renderWordList();
+}
+
+function changePageSize() {
+  pageSize = parseInt(document.getElementById('page-size').value);
+  currentPage = 0; renderWordList();
+}
+
+function changePage(dir) {
+  const list = getDisplayList();
+  const totalPages = Math.ceil(list.length / pageSize);
+  currentPage = Math.max(0, Math.min(currentPage + dir, totalPages - 1));
+  renderWordList();
+}
+
 function renderWordList() {
   document.getElementById('word-count').textContent = words.length;
-  document.getElementById('word-list').innerHTML = words.map((w, i) => `
-    <span class="tag">${w}<button onclick="removeWord(${i})" title="Supprimer">×</button></span>`).join('');
-  // update height if list is open
+  const list = getDisplayList();
+  const totalPages = Math.ceil(list.length / pageSize);
+  const start = currentPage * pageSize;
+  const end = Math.min(start + pageSize, list.length);
+  const page = list.slice(start, end);
+
+  document.getElementById('word-rows').innerHTML = page.map(({w, i}, pi) => {
+    const colonIdx = w.indexOf(':');
+    const main = colonIdx > -1 ? w.slice(0, colonIdx).trim() : w;
+    const hint = colonIdx > -1 ? w.slice(colonIdx + 1).trim() : '';
+    return `<div class="word-row">
+      <span class="word-num">${start + pi + 1}</span>
+      <span class="word-text">
+        <span class="word-main">${main}</span>${hint ? `<span class="word-hint"> — ${hint}</span>` : ''}
+      </span>
+      <button class="del-btn" onclick="removeWord(${i})" title="Supprimer">×</button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('page-info').textContent =
+    `${start + 1}–${end} sur ${list.length}`;
+  document.getElementById('btn-prev-page').disabled = currentPage === 0;
+  document.getElementById('btn-next-page').disabled = currentPage >= totalPages - 1;
+
+  // update open height
   if (listVisible) {
-    const wrap = document.getElementById('word-list-wrap');
-    wrap.style.maxHeight = 'none';
-    requestAnimationFrame(() => { wrap.style.maxHeight = wrap.scrollHeight + 'px'; });
+    const body = document.getElementById('list-body');
+    body.style.maxHeight = 'none';
+    requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px'; });
+  }
+}
+
+function toggleList() {
+  listVisible = !listVisible;
+  const body = document.getElementById('list-body');
+  const btn = document.getElementById('toggle-list-btn');
+  if (listVisible) {
+    body.classList.remove('collapsed');
+    body.style.maxHeight = body.scrollHeight + 'px';
+    btn.textContent = '▴ Masquer';
+  } else {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => body.classList.add('collapsed'));
+    btn.textContent = '▾ Afficher';
   }
 }
 
@@ -416,11 +478,14 @@ function addWord() {
   const val = input.value.trim();
   if (!val) return;
   words.push(val); input.value = '';
+  currentPage = Math.floor((words.length - 1) / pageSize); // jump to last page
   renderWordList(); shuffleDeck();
 }
 
-function removeWord(i) {
-  words.splice(i, 1); renderWordList();
+function removeWord(realIdx) {
+  words.splice(realIdx, 1);
+  if (currentPage >= Math.ceil(words.length / pageSize)) currentPage = Math.max(0, currentPage - 1);
+  renderWordList();
   if (words.length) shuffleDeck();
   else {
     document.getElementById('card').innerHTML = `<div class="front"><div class="word">—</div><div class="tap-hint">Ajoutez des mots ci-dessous</div></div>`;
