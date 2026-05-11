@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🇫🇷 Mes Flashcards</title>
+<title>Mes Flashcards</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -28,8 +28,7 @@
   #setup button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; }
   #setup button:hover { background: var(--accent-hover); }
   #api-status { font-size: 12px; margin-top: 6px; font-family: sans-serif; }
-  #api-status.ok { color: var(--accent); }
-  #api-status.err { color: var(--danger); }
+  #api-status.ok { color: var(--accent); } #api-status.err { color: var(--danger); }
 
   /* Card */
   #card-wrap { width: 100%; max-width: 560px; margin-bottom: 1rem; }
@@ -54,7 +53,7 @@
   .loading-text { font-size: 13px; color: var(--text-faint); font-family: sans-serif; }
   #error-msg { font-size: 13px; color: var(--danger); text-align: center; margin-top: 8px; font-family: sans-serif; min-height: 20px; }
 
-  /* Controls */
+  /* Deck controls */
   .controls { width: 100%; max-width: 560px; display: flex; gap: 10px; margin-bottom: 2rem; }
   .controls button { flex: 1; padding: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; color: var(--text); transition: background 0.12s, border-color 0.12s; }
   .controls button:hover { background: var(--pill-bg); border-color: var(--border-strong); }
@@ -62,64 +61,66 @@
   /* Word list panel */
   #list-section { width: 100%; max-width: 560px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 
-  /* List toolbar */
-  .list-toolbar { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .list-title { font-family: sans-serif; font-size: 14px; color: var(--text-muted); flex: 1; white-space: nowrap; }
+  .list-toolbar { padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .list-title { font-family: sans-serif; font-size: 14px; color: var(--text-muted); white-space: nowrap; margin-right: auto; }
   .list-title strong { color: var(--text); }
 
-  .sort-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .sort-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; flex-shrink: 0; }
   .sort-btn { background: var(--surface); border: none; padding: 5px 11px; font-family: sans-serif; font-size: 12px; color: var(--text-faint); cursor: pointer; transition: background 0.12s, color 0.12s; white-space: nowrap; }
   .sort-btn:not(:last-child) { border-right: 1px solid var(--border); }
   .sort-btn.active { background: var(--accent); color: white; }
   .sort-btn:hover:not(.active) { background: var(--pill-bg); color: var(--text-muted); }
 
-  .toggle-list-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 11px; font-family: sans-serif; font-size: 12px; color: var(--text-faint); cursor: pointer; white-space: nowrap; }
+  .toggle-list-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 11px; font-family: sans-serif; font-size: 12px; color: var(--text-faint); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
   .toggle-list-btn:hover { border-color: var(--border-strong); color: var(--text-muted); }
+
+  /* Search + add */
+  .search-add-row { display: flex; gap: 8px; padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .search-add-row input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Georgia', serif; font-size: 14px; background: var(--bg); color: var(--text); outline: none; min-width: 0; }
+  .search-add-row input:focus { border-color: var(--accent); }
+  .search-add-row input::placeholder { color: var(--text-faint); }
+  #search-box { flex: 1.2; font-family: sans-serif; font-size: 13px; }
+  .search-add-row button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+  .search-add-row button:hover { background: var(--accent-hover); }
 
   /* Collapsible body */
   #list-body { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; }
   #list-body.collapsed { max-height: 0 !important; opacity: 0; }
 
-  /* Add row */
-  .add-row { display: flex; gap: 8px; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
-  .add-row input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Georgia', serif; font-size: 14px; background: var(--bg); color: var(--text); outline: none; }
-  .add-row input:focus { border-color: var(--accent); }
-  .add-row input::placeholder { color: var(--text-faint); }
-  .add-row button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: sans-serif; font-size: 13px; }
-  .add-row button:hover { background: var(--accent-hover); }
-
   /* Word rows */
-  #word-rows { padding: 0.5rem 0; }
-  .word-row { display: flex; align-items: center; gap: 10px; padding: 7px 1.25rem; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 13px; }
+  #word-rows { }
+  .word-row { display: flex; align-items: center; gap: 10px; padding: 8px 1.25rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
   .word-row:last-child { border-bottom: none; }
   .word-row:hover { background: var(--bg); }
-  .word-num { color: var(--text-faint); font-family: 'Courier New', monospace; font-size: 11px; min-width: 28px; }
-  .word-text { flex: 1; color: var(--text); line-height: 1.4; }
-  .word-text .word-main { font-weight: 500; }
-  .word-text .word-hint { color: var(--text-faint); font-size: 12px; }
-  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 4px; }
+  .word-num { color: var(--text-faint); font-family: 'Courier New', monospace; font-size: 11px; min-width: 28px; flex-shrink: 0; }
+  .word-text { flex: 1; font-family: sans-serif; font-size: 13px; line-height: 1.4; min-width: 0; }
+  .word-main { font-weight: 500; color: var(--text); }
+  .word-hint { color: var(--text-faint); font-size: 12px; }
+  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 17px; line-height: 1; padding: 2px 5px; border-radius: 4px; flex-shrink: 0; }
   .del-btn:hover { color: var(--danger); background: #fdf0ee; }
+  .no-results { padding: 1.25rem; font-family: sans-serif; font-size: 13px; color: var(--text-faint); text-align: center; }
 
   /* Pagination */
-  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); gap: 8px; }
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
   .page-info { font-family: sans-serif; font-size: 12px; color: var(--text-faint); }
   .page-btns { display: flex; gap: 6px; align-items: center; }
   .page-size-select { font-family: sans-serif; font-size: 12px; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-muted); cursor: pointer; outline: none; }
   .page-nav { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 10px; font-family: sans-serif; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: background 0.12s; }
   .page-nav:hover:not(:disabled) { background: var(--pill-bg); border-color: var(--border-strong); }
   .page-nav:disabled { opacity: 0.35; cursor: default; }
+  .highlight { background: #fff3b0; border-radius: 2px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🇫🇷 Mes flashcards</h1>
+  <h1>&#127467;&#127479; Mes flashcards</h1>
   <span id="counter"></span>
 </header>
 
 <div id="setup">
-  <p>Clé API Groq gratuite → <a href="https://console.groq.com" target="_blank">console.groq.com</a> (créer un compte → API Keys → Create API Key)</p>
-  <label>Clé API Groq (stockée localement dans votre navigateur)</label>
+  <p>Cle API Groq gratuite &#8594; <a href="https://console.groq.com" target="_blank">console.groq.com</a> (creer un compte &#8594; API Keys &#8594; Create API Key)</p>
+  <label>Cle API Groq (stockee localement dans votre navigateur)</label>
   <div class="row">
     <input type="password" id="api-key" placeholder="gsk_..." autocomplete="off" />
     <button onclick="saveKey()">Enregistrer</button>
@@ -129,32 +130,31 @@
 
 <div id="card-wrap">
   <div id="card" onclick="flipCard()">
-    <div class="front"><div class="word">—</div><div class="tap-hint">cliquez pour révéler</div></div>
+    <div class="front"><div class="word">&#8212;</div><div class="tap-hint">cliquez pour reveler</div></div>
   </div>
   <div id="error-msg"></div>
 </div>
 
 <div class="controls">
-  <button onclick="prevCard()">← Précédent</button>
-  <button onclick="shuffleDeck()">⇄ Mélanger</button>
-  <button onclick="nextCard()">Suivant →</button>
+  <button onclick="prevCard()">&#8592; Precedent</button>
+  <button onclick="shuffleDeck()">&#8644; Melanger</button>
+  <button onclick="nextCard()">Suivant &#8594;</button>
 </div>
 
-<!-- Word list panel -->
 <div id="list-section">
   <div class="list-toolbar">
     <span class="list-title">Mots &nbsp;<strong id="word-count">0</strong></span>
     <div class="sort-group">
-      <button class="sort-btn active" id="sort-added" onclick="setSort('added')">Ajouté</button>
-      <button class="sort-btn" id="sort-alpha" onclick="setSort('alpha')">A → Z</button>
+      <button class="sort-btn active" id="sort-added" onclick="setSort('added')">Ajoute</button>
+      <button class="sort-btn" id="sort-alpha" onclick="setSort('alpha')">A &#8594; Z</button>
     </div>
-    <button class="toggle-list-btn" id="toggle-list-btn" onclick="toggleList()">▾ Afficher</button>
+    <button class="toggle-list-btn" id="toggle-list-btn" onclick="toggleList()">&#9660; Afficher</button>
   </div>
 
   <div id="list-body" class="collapsed">
-    <div class="add-row">
-      <input type="text" id="new-word" placeholder="ex: rigueur  ou  livrer: to deliver"
-        onkeydown="if(event.key==='Enter') addWord()" />
+    <div class="search-add-row">
+      <input type="text" id="search-box" placeholder="Filtrer les mots..." oninput="onSearch()" />
+      <input type="text" id="new-word" placeholder="Ajouter: ex. livrer: to deliver" onkeydown="if(event.key==='Enter') addWord()" />
       <button onclick="addWord()">+ Ajouter</button>
     </div>
     <div id="word-rows"></div>
@@ -166,8 +166,8 @@
           <option value="50">50 / page</option>
           <option value="100">100 / page</option>
         </select>
-        <button class="page-nav" id="btn-prev-page" onclick="changePage(-1)">← Préc.</button>
-        <button class="page-nav" id="btn-next-page" onclick="changePage(1)">Suiv. →</button>
+        <button class="page-nav" id="btn-prev-page" onclick="changePage(-1)">&#8592; Prec.</button>
+        <button class="page-nav" id="btn-next-page" onclick="changePage(1)">Suiv. &#8594;</button>
       </div>
     </div>
   </div>
@@ -181,8 +181,8 @@ const INITIAL_WORDS = [
   "Rigueur",
   "Fournir: to provide",
   "Rater: to fail or miss",
-  "ça n'a pas de sens",
-  "Déclencher",
+  "ca n'a pas de sens",
+  "Declencher",
   "Rajouter",
   "Livrer",
   "Je me suis rendu: I went / I realized",
@@ -191,106 +191,106 @@ const INITIAL_WORDS = [
   "La gestion: management / handling",
   "Du coup: so / as a result",
   "Constituer: to constitute / to make up",
-  "Contrairement à LTE: unlike LTE",
+  "Contrairement a LTE: unlike LTE",
   "Fichier et dossier: file and folder",
   "Ramener sa fraise: to show up uninvited / to butt in",
   "Souligner: to underline / to highlight",
   "Assigner: to assign",
-  "Établir / il établit: to establish / he establishes",
-  "Par rapport à: compared to / regarding",
-  "J'ai noté: I noted / I noticed",
+  "Etablir / il etablit: to establish / he establishes",
+  "Par rapport a: compared to / regarding",
+  "J'ai note: I noted / I noticed",
   "Je remarque: I notice",
   "Entre guillemets: in quotes",
-  "Entre parenthèses: in brackets",
+  "Entre parentheses: in brackets",
   "Je regarde ce qui se passe dans: I look at what is happening in",
-  "Gérer: to manage / to handle",
+  "Gerer: to manage / to handle",
   "Deux par deux, quatre par quatre: two by two, four by four",
   "Est-ce qu'il y a un moyen de mesurer qqch: is there a way to measure sth",
-  "Le métro est bondé / surchargé: the metro is packed / overloaded",
+  "Le metro est bonde / surcharge: the metro is packed / overloaded",
   "Obtenir: to obtain / to get",
   "Il obtient: he obtains / he gets",
-  "J'ai fait un résumé: I made a summary",
-  "J'ai viré: I removed / I fired",
+  "J'ai fait un resume: I made a summary",
+  "J'ai vire: I removed / I fired",
   "Virer: to remove / to fire / to transfer",
   "De temps en temps: from time to time",
-  "La réponse: the answer / the response",
-  "J'ai corrigé: I corrected / I fixed",
+  "La reponse: the answer / the response",
+  "J'ai corrige: I corrected / I fixed",
   "Au niveau de: at the level of / in terms of",
   "Il va falloir: we'll need to / it will be necessary to",
-  "Le problème est réglé: the problem is solved",
+  "Le probleme est regle: the problem is solved",
   "Multiplier les matrices: to multiply the matrices",
   "Je disais que: I was saying that",
-  "Décaler: to shift / to offset",
+  "Decaler: to shift / to offset",
   "Tous les signaux: all the signals",
   "On a pas mal de trucs pour le faire: we have quite a few things to do it",
   "Plusieurs cellules: several cells",
   "Sauf que tu dois faire qqch: except that you have to do sth",
   "C'est ce que je disais: that's what I was saying",
-  "C'est à toi: it's your turn / it's yours",
-  "Il correspond à: it corresponds to",
+  "C'est a toi: it's your turn / it's yours",
+  "Il correspond a: it corresponds to",
   "Explicitement: explicitly",
   "C'est aussi bon: it's just as good",
   "Investigation",
   "Emmerder: to annoy / to bug someone",
-  "Ça me fait poser la question: it makes me wonder / raises the question",
+  "Ca me fait poser la question: it makes me wonder / raises the question",
   "Dans certaines conditions: under certain conditions",
-  "Cohérent: consistent / coherent",
+  "Coherent: consistent / coherent",
   "Confiance en soi: self-confidence",
-  "Il m'a parlé: he spoke to me",
+  "Il m'a parle: he spoke to me",
   "On avait fait: we had done",
   "J'avais fait: I had done",
   "On n'a jamais pu tester: we were never able to test",
-  "Ça rajoute un mode: it adds a mode",
-  "Ça sert à: it is used for / it serves to",
-  "Inférieur: lower / inferior",
-  "Supérieur: higher / superior",
-  "Au début: at the beginning",
-  "À la fin / au bout: at the end",
+  "Ca rajoute un mode: it adds a mode",
+  "Ca sert a: it is used for / it serves to",
+  "Inferieur: lower / inferior",
+  "Superieur: higher / superior",
+  "Au debut: at the beginning",
+  "A la fin / au bout: at the end",
   "A priori: a priori / in principle",
   "Faible ou fort: weak or strong / low or high",
   "En revanche: on the other hand / however",
   "Traiteur: caterer / deli",
-  "Régulièrement: regularly",
-  "Étend la connectivité: extends connectivity",
+  "Regulierement: regularly",
+  "Etend la connectivite: extends connectivity",
   "Le flux protocolaire: the protocol flow",
-  "Le défi principal: the main challenge",
-  "Exprimé: expressed",
-  "Les fichiers config qui correspondent à: the config files that correspond to",
-  "Résoudre: to solve / to resolve",
-  "Cela résout: this solves / this resolves",
-  "Activer ou désactiver: to enable or disable",
+  "Le defi principal: the main challenge",
+  "Exprime: expressed",
+  "Les fichiers config qui correspondent a: the config files that correspond to",
+  "Resoudre: to solve / to resolve",
+  "Cela resout: this solves / this resolves",
+  "Activer ou desactiver: to enable or disable",
   "2 par 2 ou 4 par 4: 2 by 2 or 4 by 4",
   "Boucle: loop",
-  "Par défaut: by default",
-  "Des fois ça marche, des fois ça marche pas: sometimes it works, sometimes it doesn't",
+  "Par defaut: by default",
+  "Des fois ca marche, des fois ca marche pas: sometimes it works, sometimes it doesn't",
   "Basculer: to tip / to flip / to switch from one state to another",
-  "J'ai corrigé les bugs: I fixed the bugs",
-  "J'ai résolu les erreurs: I resolved the errors",
-  "Le problème est résolu: the problem is resolved",
-  "C'est résolu: it's resolved",
-  "Dépasser: to exceed / to go beyond",
-  "Ça ne dépasse pas la limite: it doesn't exceed the limit",
-  "Ça équilibre le ratio: it balances the ratio",
+  "J'ai corrige les bugs: I fixed the bugs",
+  "J'ai resolu les erreurs: I resolved the errors",
+  "Le probleme est resolu: the problem is resolved",
+  "C'est resolu: it's resolved",
+  "Depasser: to exceed / to go beyond",
+  "Ca ne depasse pas la limite: it doesn't exceed the limit",
+  "Ca equilibre le ratio: it balances the ratio",
   "Comportement: behavior",
-  "Relâcher: to release / to let go",
-  "Pleines, occupées: full, busy / occupied",
-  "Ça me ralentit / ça me fait ralentir: it slows me down",
-  "Le scénario: the scenario",
+  "Relacher: to release / to let go",
+  "Pleines, occupees: full, busy / occupied",
+  "Ca me ralentit / ca me fait ralentir: it slows me down",
+  "Le scenario: the scenario",
   "Prendre l'air: to get some fresh air",
   "Concurrent: concurrent / competitor",
-  "Aligné: aligned",
-  "Le problème c'est que: the problem is that",
+  "Aligne: aligned",
+  "Le probleme c'est que: the problem is that",
   "Gros/grosse: big (volume / thickness / importance)",
   "Grand/grande: tall / large (overall size)",
   "Long/longue: long (time or physical distance)",
   "Sonnerie: ringtone / ringing",
   "Une puissance constante: a constant power",
-  "Si ça a l'air suffisant: if it looks sufficient",
-  "J'ai demandé à quelqu'un: I asked someone",
-  "C'est ce qui m'a occupé: that's what kept me busy",
-  "La semaine dernière / la semaine d'avant: last week / the week before",
-  "La semaine prochaine / la semaine d'après: next week / the week after",
-  "On a livré aux clients principaux: we delivered to the main clients",
+  "Si ca a l'air suffisant: if it looks sufficient",
+  "J'ai demande a quelqu'un: I asked someone",
+  "C'est ce qui m'a occupe: that's what kept me busy",
+  "La semaine derniere / la semaine d'avant: last week / the week before",
+  "La semaine prochaine / la semaine d'apres: next week / the week after",
+  "On a livre aux clients principaux: we delivered to the main clients",
   "Les gens qui veulent: the people who want",
   "Ils font quelque chose: they do something",
   "Ils vont quelque part: they go somewhere",
@@ -299,9 +299,9 @@ const INITIAL_WORDS = [
   "C'est l'ancien algo: it's the old algorithm",
   "C'est le nouvel algo: it's the new algorithm",
   "Il n'y a qu'un seul: there is only one",
-  "Ça me saoule / ça me soûle: it's annoying me / it's getting on my nerves",
-  "Ça pourrait être: it could be",
-  "Ça m'a surpris: it surprised me",
+  "Ca me saoule / ca me soule: it's annoying me / it's getting on my nerves",
+  "Ca pourrait etre: it could be",
+  "Ca m'a surpris: it surprised me",
   "Cramer: to burn / to fry (informal)",
 ];
 
@@ -312,27 +312,28 @@ let flipped = false;
 let cache = {};
 let loading = false;
 let listVisible = false;
-let sortMode = 'added'; // 'added' | 'alpha'
+let sortMode = 'added';
 let pageSize = 25;
 let currentPage = 0;
+let searchQuery = '';
 let apiKey = localStorage.getItem('groq_key') || '';
 
-// ── API key ──────────────────────────────────────────────────────────────
+// ── API key ───────────────────────────────────────────────────────────────
 function saveKey() {
   const val = document.getElementById('api-key').value.trim();
-  if (!val.startsWith('gsk_')) { setStatus('Clé invalide (doit commencer par gsk_...)', false); return; }
+  if (!val.startsWith('gsk_')) { setStatus('Cle invalide (doit commencer par gsk_...)', false); return; }
   apiKey = val;
   localStorage.setItem('groq_key', val);
   document.getElementById('api-key').value = '';
-  setStatus('✓ Clé enregistrée', true);
+  setStatus('Cle enregistree', true);
 }
 function setStatus(msg, ok) {
   const el = document.getElementById('api-status');
   el.textContent = msg; el.className = ok ? 'ok' : 'err';
 }
-if (apiKey) setStatus('✓ Clé chargée depuis la mémoire locale', true);
+if (apiKey) setStatus('Cle chargee depuis la memoire locale', true);
 
-// ── Deck ─────────────────────────────────────────────────────────────────
+// ── Deck ──────────────────────────────────────────────────────────────────
 function shuffleDeck() {
   order = [...Array(words.length).keys()].sort(() => Math.random() - 0.5);
   cardIdx = 0; flipped = false; showFront();
@@ -340,10 +341,10 @@ function shuffleDeck() {
 function showFront() {
   flipped = false;
   const word = words[order[cardIdx]];
-  document.getElementById('card').innerHTML = `
-    <div class="front"><div class="word">${word}</div><div class="tap-hint">cliquez pour révéler</div></div>`;
+  document.getElementById('card').innerHTML =
+    '<div class="front"><div class="word">' + word + '</div><div class="tap-hint">cliquez pour reveler</div></div>';
   document.getElementById('error-msg').textContent = '';
-  document.getElementById('counter').textContent = `${cardIdx + 1} / ${words.length}`;
+  document.getElementById('counter').textContent = (cardIdx + 1) + ' / ' + words.length;
 }
 function prevCard() { if (cardIdx > 0) { cardIdx--; showFront(); } }
 function nextCard() { if (cardIdx < order.length - 1) { cardIdx++; showFront(); } }
@@ -351,11 +352,15 @@ function nextCard() { if (cardIdx < order.length - 1) { cardIdx++; showFront(); 
 async function flipCard() {
   if (loading) return;
   if (flipped) { showFront(); return; }
-  if (!apiKey) { document.getElementById('error-msg').textContent = 'Entrez votre clé API Groq ci-dessus.'; return; }
+  if (!apiKey) { document.getElementById('error-msg').textContent = 'Entrez votre cle API Groq ci-dessus.'; return; }
   const word = words[order[cardIdx]];
+  await lookupWord(word);
+}
+
+async function lookupWord(word) {
   if (cache[word]) { showBack(cache[word]); return; }
   loading = true; flipped = true;
-  document.getElementById('card').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><div class="loading-text">Consultation du dictionnaire...</div></div>`;
+  document.getElementById('card').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><div class="loading-text">Consultation du dictionnaire...</div></div>';
   document.getElementById('error-msg').textContent = '';
   try {
     const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -364,45 +369,56 @@ async function flipCard() {
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant', temperature: 0.4, max_tokens: 600,
         messages: [
-          { role: 'system', content: 'You are a French language teacher. Always respond with valid JSON only — no markdown, no explanation, no extra text.' },
-          { role: 'user', content: `For the French word or phrase: "${word}"\n\nReturn ONLY a JSON object:\n{\n  "word": "cleaned up word/phrase",\n  "translation": "English translation",\n  "synonyms": ["syn1","syn2","syn3"],\n  "examples": ["Professional context sentence.","Casual context sentence.","Another context sentence."]\n}\nAll synonyms and examples must be in French.` }
+          { role: 'system', content: 'You are a French language teacher. Always respond with valid JSON only, no markdown, no explanation.' },
+          { role: 'user', content: 'For the French word or phrase: "' + word + '"\nReturn ONLY this JSON:\n{\n  "word": "cleaned word/phrase",\n  "translation": "English translation",\n  "synonyms": ["syn1","syn2","syn3"],\n  "examples": ["Professional context.","Casual context.","Another context."]\n}\nAll synonyms and examples must be in French.' }
         ]
       })
     });
-    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || `HTTP ${resp.status}`); }
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || 'HTTP ' + resp.status); }
     const data = await resp.json();
     const parsed = JSON.parse(data.choices[0].message.content.replace(/```json|```/g,'').trim());
     cache[word] = parsed; showBack(parsed);
   } catch(e) {
-    document.getElementById('error-msg').textContent = 'Erreur : ' + e.message; showFront();
+    document.getElementById('error-msg').textContent = 'Erreur : ' + e.message;
+    flipped = false;
+    showFront();
   }
   loading = false;
 }
 
 function showBack(data) {
-  const pills = (data.synonyms||[]).map(s=>`<span class="pill">${s}</span>`).join('');
-  const exs = (data.examples||[]).map(e=>`<div class="example">${e}</div>`).join('');
-  document.getElementById('card').innerHTML = `
-    <div class="back">
-      <div class="word-sm">${data.word||''}</div>
-      <div class="translation">${data.translation||''}</div>
-      <hr class="divider">
-      <div class="section-label">Synonymes</div>
-      <div class="synonym-row">${pills||'<span style="font-size:13px;color:#9e9b94;font-family:sans-serif">—</span>'}</div>
-      <div class="section-label">Exemples</div>
-      <div class="examples">${exs}</div>
-    </div>`;
+  const pills = (data.synonyms||[]).map(s => '<span class="pill">' + s + '</span>').join('');
+  const exs = (data.examples||[]).map(e => '<div class="example">' + e + '</div>').join('');
+  document.getElementById('card').innerHTML =
+    '<div class="back">' +
+    '<div class="word-sm">' + (data.word||'') + '</div>' +
+    '<div class="translation">' + (data.translation||'') + '</div>' +
+    '<hr class="divider">' +
+    '<div class="section-label">Synonymes</div>' +
+    '<div class="synonym-row">' + (pills || '<span style="font-size:13px;color:#9e9b94;font-family:sans-serif">&#8212;</span>') + '</div>' +
+    '<div class="section-label">Exemples</div>' +
+    '<div class="examples">' + exs + '</div>' +
+    '</div>';
   flipped = true;
 }
 
 // ── Word list ─────────────────────────────────────────────────────────────
+function onSearch() {
+  searchQuery = document.getElementById('search-box').value.toLowerCase();
+  currentPage = 0;
+  renderWordList();
+}
+
 function getDisplayList() {
-  if (sortMode === 'alpha') {
-    return [...words].map((w,i)=>({w,i})).sort((a,b)=>
-      a.w.replace(/[^a-zA-ZÀ-ÿ]/g,'').toLowerCase().localeCompare(
-        b.w.replace(/[^a-zA-ZÀ-ÿ]/g,'').toLowerCase(), 'fr'));
+  let list = words.map((w,i) => ({w, i}));
+  if (searchQuery) {
+    list = list.filter(({w}) => w.toLowerCase().includes(searchQuery));
   }
-  return words.map((w,i)=>({w,i}));
+  if (sortMode === 'alpha') {
+    list.sort((a,b) => a.w.replace(/[^a-zA-Z]/g,'').toLowerCase()
+      .localeCompare(b.w.replace(/[^a-zA-Z]/g,'').toLowerCase(), 'fr'));
+  }
+  return list;
 }
 
 function setSort(mode) {
@@ -418,44 +434,55 @@ function changePageSize() {
 }
 
 function changePage(dir) {
-  const list = getDisplayList();
-  const totalPages = Math.ceil(list.length / pageSize);
-  currentPage = Math.max(0, Math.min(currentPage + dir, totalPages - 1));
+  const total = Math.ceil(getDisplayList().length / pageSize);
+  currentPage = Math.max(0, Math.min(currentPage + dir, total - 1));
   renderWordList();
+}
+
+function highlight(text) {
+  if (!searchQuery) return text;
+  const re = new RegExp('(' + searchQuery.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return text.replace(re, '<span class="highlight">$1</span>');
 }
 
 function renderWordList() {
   document.getElementById('word-count').textContent = words.length;
   const list = getDisplayList();
-  const totalPages = Math.ceil(list.length / pageSize);
+  const totalPages = Math.max(1, Math.ceil(list.length / pageSize));
+  if (currentPage >= totalPages) currentPage = totalPages - 1;
   const start = currentPage * pageSize;
   const end = Math.min(start + pageSize, list.length);
   const page = list.slice(start, end);
 
-  document.getElementById('word-rows').innerHTML = page.map(({w, i}, pi) => {
-    const colonIdx = w.indexOf(':');
-    const main = colonIdx > -1 ? w.slice(0, colonIdx).trim() : w;
-    const hint = colonIdx > -1 ? w.slice(colonIdx + 1).trim() : '';
-    return `<div class="word-row" onclick="jumpToWord(${i})" style="cursor:pointer" title="Voir la définition">
-      <span class="word-num">${start + pi + 1}</span>
-      <span class="word-text">
-        <span class="word-main">${main}</span>${hint ? `<span class="word-hint"> — ${hint}</span>` : ''}
-      </span>
-      <button class="del-btn" onclick="event.stopPropagation();removeWord(${i})" title="Supprimer">×</button>
-    </div>`;
-  }).join('');
+  if (page.length === 0) {
+    document.getElementById('word-rows').innerHTML = '<div class="no-results">Aucun mot trouv&#233;.</div>';
+  } else {
+    document.getElementById('word-rows').innerHTML = page.map(({w, i}, pi) => {
+      const colonIdx = w.indexOf(':');
+      const main = colonIdx > -1 ? w.slice(0, colonIdx).trim() : w;
+      const hint = colonIdx > -1 ? w.slice(colonIdx + 1).trim() : '';
+      return '<div class="word-row" onclick="jumpToWord(' + i + ')" title="Voir la definition">' +
+        '<span class="word-num">' + (start + pi + 1) + '</span>' +
+        '<span class="word-text"><span class="word-main">' + highlight(main) + '</span>' +
+        (hint ? '<span class="word-hint"> &#8212; ' + highlight(hint) + '</span>' : '') +
+        '</span>' +
+        '<button class="del-btn" onclick="event.stopPropagation();removeWord(' + i + ')" title="Supprimer">&#215;</button>' +
+        '</div>';
+    }).join('');
+  }
 
   document.getElementById('page-info').textContent =
-    `${start + 1}–${end} sur ${list.length}`;
+    list.length === 0 ? '0 mot' : (start+1) + '\u2013' + end + ' sur ' + list.length;
   document.getElementById('btn-prev-page').disabled = currentPage === 0;
   document.getElementById('btn-next-page').disabled = currentPage >= totalPages - 1;
 
-  // update open height
-  if (listVisible) {
-    const body = document.getElementById('list-body');
-    body.style.maxHeight = 'none';
-    requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px'; });
-  }
+  if (listVisible) resetBodyHeight();
+}
+
+function resetBodyHeight() {
+  const body = document.getElementById('list-body');
+  body.style.maxHeight = 'none';
+  requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px'; });
 }
 
 function toggleList() {
@@ -465,12 +492,22 @@ function toggleList() {
   if (listVisible) {
     body.classList.remove('collapsed');
     body.style.maxHeight = body.scrollHeight + 'px';
-    btn.textContent = '▴ Masquer';
+    btn.textContent = '\u25b2 Masquer';
   } else {
     body.style.maxHeight = body.scrollHeight + 'px';
     requestAnimationFrame(() => body.classList.add('collapsed'));
-    btn.textContent = '▾ Afficher';
+    btn.textContent = '\u25bc Afficher';
   }
+}
+
+function jumpToWord(realIdx) {
+  order = [...Array(words.length).keys()];
+  cardIdx = realIdx;
+  flipped = false;
+  document.getElementById('counter').textContent = (cardIdx+1) + ' / ' + words.length;
+  if (apiKey) lookupWord(words[realIdx]);
+  else showFront();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function addWord() {
@@ -478,64 +515,26 @@ function addWord() {
   const val = input.value.trim();
   if (!val) return;
   words.push(val); input.value = '';
+  searchQuery = ''; document.getElementById('search-box').value = '';
   currentPage = Math.floor((words.length - 1) / pageSize);
   renderWordList();
-  // Point deck to the new word and auto-lookup
+  // Show new word on card and look it up
   order = [...Array(words.length).keys()];
   cardIdx = words.length - 1;
   flipped = false;
-  document.getElementById('counter').textContent = `${cardIdx + 1} / ${words.length}`;
-  lookupWord(val);
+  document.getElementById('counter').textContent = (cardIdx+1) + ' / ' + words.length;
+  if (apiKey) lookupWord(val);
+  else showFront();
 }
 
-async function lookupWord(word) {
-  if (!apiKey) {
-    // just show the front without lookup
-    showFront(); return;
-  }
-  if (cache[word]) { showBack(cache[word]); return; }
-  loading = true; flipped = true;
-  document.getElementById('card').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div><div class="loading-text">Consultation du dictionnaire...</div></div>`;
-  document.getElementById('error-msg').textContent = '';
-  try {
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant', temperature: 0.4, max_tokens: 600,
-        messages: [
-          { role: 'system', content: 'You are a French language teacher. Always respond with valid JSON only — no markdown, no explanation, no extra text.' },
-          { role: 'user', content: `For the French word or phrase: "${word}"\n\nReturn ONLY a JSON object:\n{\n  "word": "cleaned up word/phrase",\n  "translation": "English translation",\n  "synonyms": ["syn1","syn2","syn3"],\n  "examples": ["Professional context sentence.","Casual context sentence.","Another context sentence."]\n}\nAll synonyms and examples must be in French.` }
-        ]
-      })
-    });
-    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || `HTTP ${resp.status}`); }
-    const data = await resp.json();
-    const parsed = JSON.parse(data.choices[0].message.content.replace(/```json|```/g,'').trim());
-    cache[word] = parsed; showBack(parsed);
-  } catch(e) {
-    document.getElementById('error-msg').textContent = 'Erreur : ' + e.message; showFront();
-  }
-  loading = false;
-}
-
-function jumpToWord(realIdx) {
-  order = [...Array(words.length).keys()];
-  cardIdx = realIdx;
-  flipped = false;
-  document.getElementById('counter').textContent = `${cardIdx + 1} / ${words.length}`;
-  lookupWord(words[realIdx]);
-  // scroll to top so card is visible
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-
+function removeWord(realIdx) {
   words.splice(realIdx, 1);
-  if (currentPage >= Math.ceil(words.length / pageSize)) currentPage = Math.max(0, currentPage - 1);
+  const total = Math.ceil(getDisplayList().length / pageSize);
+  if (currentPage >= total) currentPage = Math.max(0, total - 1);
   renderWordList();
   if (words.length) shuffleDeck();
   else {
-    document.getElementById('card').innerHTML = `<div class="front"><div class="word">—</div><div class="tap-hint">Ajoutez des mots ci-dessous</div></div>`;
+    document.getElementById('card').innerHTML = '<div class="front"><div class="word">&#8212;</div><div class="tap-hint">Ajoutez des mots ci-dessous</div></div>';
     document.getElementById('counter').textContent = '';
   }
 }
